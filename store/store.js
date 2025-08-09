@@ -1,28 +1,7 @@
-import { createContext, useReducer, useState } from "react";
-
-const DummyExpenses = [
-  {
-    id: "e1",
-    name: "Groceries",
-    amount: 100,
-    date: "2025-07-31",
-  },
-  {
-    id: "e2",
-    name: "Transport",
-    amount: 200,
-    date: "2025-08-01",
-  },
-  {
-    id: "e3",
-    name: "Entertainment",
-    amount: 300,
-    date: "2025-08-02",
-  },
-];
+import { createContext, useReducer } from "react";
 
 export const StoreContext = createContext({
-  expenses: DummyExpenses,
+  expenses: [],
   addExpense: ({ name, amount, date }) => {},
   removeExpense: (id) => {},
   updateExpense: ({ id, name, amount, date }) => {},
@@ -35,6 +14,8 @@ const expenseReducer = (state, action) => {
       return [...state, { id, ...action.payload }];
     case "REMOVE":
       return state.filter((expense) => expense.id !== action.payload);
+    case "SET":
+      return action.payload;
     case "UPDATE":
       return state.map((expense) => {
         if (expense.id === action.payload.id) {
@@ -48,7 +29,7 @@ const expenseReducer = (state, action) => {
 };
 
 export default function StoreProvider({ children }) {
-  const [expenses, dispatch] = useReducer(expenseReducer, DummyExpenses);
+  const [expenses, dispatch] = useReducer(expenseReducer, []);
 
   const addExpense = (expense) => {
     dispatch({ type: "ADD", payload: { ...expense } });
@@ -60,11 +41,16 @@ export default function StoreProvider({ children }) {
     dispatch({ type: "UPDATE", payload: { ...expense } });
   };
 
+  const setExpenses = (expenses) => {
+    dispatch({ type: "SET", payload: expenses });
+  };
+
   const store = {
     expenses,
     addExpense,
     removeExpense,
     updateExpense,
+    setExpenses,
   };
   return (
     <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
